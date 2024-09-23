@@ -1,0 +1,35 @@
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const connection = require('../db/connection');
+const router = express.Router();
+
+// Ruta para procesar el inicio de sesión
+router.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // Buscar el usuario en la base de datos
+    const query = 'SELECT * FROM users WHERE username = ?';
+    connection.query(query, [username], (err, results) => {
+        if (err) throw err;
+
+        if (results.length > 0) {
+            const user = results[0];
+
+            // Verificar la contraseña (puedes usar bcrypt si está encriptada)
+            if (password === user.password) {
+                res.redirect('/dashboard');
+            } else {
+                res.send('Contraseña incorrecta');
+            }
+        } else {
+            res.send('Usuario no encontrado');
+        }
+    });
+});
+
+// Ruta para el dashboard
+router.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../views', 'dashboard.html'));
+});
+
+module.exports = router;
